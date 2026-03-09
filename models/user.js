@@ -2,6 +2,37 @@ import database from "infra/database.js";
 import { NotFoundError, ValidationError } from "infra/errors.js";
 import password from "models/password.js";
 
+async function findOneById(id) {
+  const userFound = await runSelectQuery(id);
+
+  return userFound;
+
+  async function runSelectQuery(id) {
+    const results = await database.query({
+      text: `
+        SELECT
+          *
+        FROM
+          users
+        WHERE
+          id = $1
+        LIMIT
+          1
+        ;`,
+      values: [id],
+    });
+
+    if (results.rowCount === 0) {
+      throw new NotFoundError({
+        message: "O id informado não foi encontrado no sistema.",
+        action: "Verifique se o id está digitado corretamente.",
+      });
+    }
+
+    return results.rows[0];
+  }
+}
+
 async function findOneByUsername(username) {
   const userFound = await runSelectQuery(username);
 
@@ -10,15 +41,15 @@ async function findOneByUsername(username) {
   async function runSelectQuery(username) {
     const results = await database.query({
       text: `
-      SELECT
-        *
-      FROM
-        users
-      WHERE
-        LOWER(username) = LOWER($1)
-      LIMIT
-        1
-      ;`,
+        SELECT
+          *
+        FROM
+          users
+        WHERE
+          LOWER(username) = LOWER($1)
+        LIMIT
+          1
+        ;`,
       values: [username],
     });
 
@@ -41,15 +72,15 @@ async function findOneByEmail(email) {
   async function runSelectQuery(email) {
     const results = await database.query({
       text: `
-      SELECT
-        *
-      FROM
-        users
-      WHERE
-        LOWER(email) = LOWER($1)
-      LIMIT
-        1
-      ;`,
+        SELECT
+          *
+        FROM
+          users
+        WHERE
+          LOWER(email) = LOWER($1)
+        LIMIT
+          1
+        ;`,
       values: [email],
     });
 
@@ -75,13 +106,13 @@ async function create(userInputValues) {
   async function runInsertQuery(userInputValues) {
     const results = await database.query({
       text: `
-      INSERT INTO 
-        users (username, email, password) 
-      VALUES 
-        ($1, $2, $3)
-      RETURNING
-        *
-      ;`,
+        INSERT INTO
+          users (username, email, password)
+        VALUES
+          ($1, $2, $3)
+        RETURNING
+          *
+        ;`,
       values: [
         userInputValues.username,
         userInputValues.email,
@@ -125,7 +156,7 @@ async function update(username, userInputValues) {
         WHERE
           id = $1
         RETURNING
-         *
+          *
       `,
       values: [
         userWithNewValues.id,
@@ -188,6 +219,7 @@ async function hashPasswordInObject(userInputValues) {
 
 const user = {
   create,
+  findOneById,
   findOneByUsername,
   findOneByEmail,
   update,
