@@ -65,7 +65,7 @@ describe("models/authorization.js", () => {
       }).toThrow(InternalServerError);
     });
 
-    test("with valid `user`, known `feature` but no `resource", () => {
+    test("with valid `user`, known `feature` but no `resource`", () => {
       const createdUser = {
         features: ["read:user"],
       };
@@ -75,7 +75,7 @@ describe("models/authorization.js", () => {
       }).toThrow(InternalServerError);
     });
 
-    test("with valid `user`, known `feature` and `resource", () => {
+    test("with valid `user`, known `feature` and `resource`", () => {
       const createdUser = {
         features: ["read:user"],
       };
